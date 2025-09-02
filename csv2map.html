@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Map Addresses from GitHub CSV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Tailwind for styling (optional) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    #map { height: 80vh; }
+  </style>
+</head>
+<body class="bg-gray-100 p-4">
+  <div class="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+    <h1 class="text-2xl font-semibold mb-4">Map Addresses from GitHub CSV</h1>
+    <p class="text-sm text-gray-600 mb-4">
+      Fetching CSV from GitHub: columns B,C,D as address number, street, postcode.
+    </p>
+    <button id="loadBtn" class="mb-4 px-4 py-2 bg-blue-600 text-white rounded">
+      Load & Map Addresses
+    </button>
+    <div id="status" class="text-sm text-gray-700 mb-4"></div>
+    <div id="map" class="rounded border"></div>
+  </div>
+
+  <script>
+    const loadBtn = document.getElementById('loadBtn');
+    const statusEl = document.getElementById('status');
+    const map = L.map('map').setView([54.0, -2.0], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    let markers = [];
+
+    async function fetchCsv(url) {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Failed to fetch CSV: ' + resp.status);
+      return await resp.text();
+    }
+
+    function parseCsv(raw) {
+      const lines = raw.split(/\r?\n/).filter(l => l.trim());
+      // Assuming header row; skip first line
+      return lines.slice(1).map(line => {
+        const cols = line.split(',');
+        // B=col1, C=col2, D=col3 (0-index = 1,2,3)
+        return [cols[1]?.trim(), cols[2]?.trim(), cols[3]?.trim()];
+      }).filter(parts => parts.length === 3 && parts.every(p => p));
+    }
+
+    async function geocode(address) {
+      const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q='
+                    + encodeURIComponent(address);
+      const resp = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+      if (!resp.ok) throw new Error('Geocoding failed: ' + resp.status);
+      const data = await resp.json();
+      return data[0] ? {
+        lat: parseFloat(data[0].lat),
+        lon: parseFloat(data[0].lon),
+        display: data[0].display_name
+      } : null;
+    }
+
+    async function loadAndMap() {
+      loadBtn.disabled = true;
+      statusEl.textContent = 'Fetching CSV...';
+
+      try {
+        const raw = await fetchCsv('https://raw.githubusercontent.com/boobalootoo/BSD/main/info.csv');
+        const addresses = parseCsv(raw);
+        statusEl.textContent = `Found ${addresses.length} addresses; geocoding...`;
+
+        let bounds = [];
+        for (let i = 0; i < addresses.length; i++) {
+          const [num, street, pc] = addresses[i];
+          const combined = `${num} ${street} ${pc}`;
+          statusEl.textContent = `Geocoding (${i+1}/${addresses.length}): ${combined}`;
+          const result = await geocode(combined);
+          if (result) {
+            const marker = L.marker([result.lat, result.lon])
+              .addTo(map)
+              .bindPopup(`<strong>${combined}</strong><br>${result.display}`);
+            markers.push(marker);
+            bounds.push([result.lat, result.lon]);
+          }
+          await new Promise(r => setTimeout(r, 1000)); // rate limit
+        }
+
+        if (bounds.length > 0) map.fitBounds(bounds);
+        statusEl.textContent = 'Mapping complete!';
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Error: ' + err.message;
+      } finally {
+        loadBtn.disabled = false;
+      }
+    }
+
+    loadBtn.addEventListener('click', loadAndMap);
+  </script>
+</body>
+</html>
