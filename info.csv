@@ -1,2 +1,15 @@
-orgname,address number,street name,postcode, opening times, phone number, email, website, who they help, category, subcategory, description 
-uytuy, 21, north street,BN1 1EB ,089789797,980980,jhjih, women, health,physical health, ftyfty,
+orgname,address number,street name,postcode,opening times,phone number,email,website,who they help,category,subcategory,description
+Brighton Health Hub,5,Queen's Road,BN1 3WA,Mon-Fri 9am-5pm,01273555101,info@bhh.org.uk,www.bhh.org.uk,Adults|Housed|Unhoused,Health,Physical Health,General practice and well-being services for all adults.
+The Sanctuary,17,Trafalgar Street,BN1 4ED,Mon-Sun 10am-10pm,01273555011,contact@thesanctuary.org.uk,www.thesanctuary.org.uk,Adults|Housed|Unhoused,Health,Mental Health,A drop-in center offering a safe space and peer support for mental health.
+Brighton Walk-in Clinic,22,Western Road,BN3 1AF,Mon-Sat 8am-8pm,01273555102,clinic@bwc.org.uk,www.bwc.org.uk,Children|Families|Housed|Unhoused,Health,Physical Health,Walk-in clinic for children's minor ailments and vaccinations.
+LGBTQ+ Mind Support,10,Prince Albert Street,BN1 1HE,Mon-Fri 10am-6pm,01273555103,support@lgbtqmind.org,www.lgbtqmind.org,LGBTQ|Adults|Housed|Unhoused,Health,Mental Health,Counselling and support groups tailored for the LGBTQ+ community.
+Food Bank Brighton,25,Church Street,BN1 1AB,Mon,Wed,Fri 1pm-4pm,01273555022,help@foodbankbrighton.org,www.foodbankbrighton.org,Families|Children|Housed|Unhoused,Food,Food Bank,Provides emergency food parcels to those in need.
+Community Kitchen,7,Trafalgar Street,BN1 4ED,Tues,Thurs 12pm-2pm,01273555104,kitchen@community.org,www.communitykitchen.org,Adults|Unhoused,Food,Community Kitchen,Provides a warm meal in a safe, community setting.
+St Peter's Soup Kitchen,2,York Place,BN1 4GU,Sun 11am-1pm,01273555105,info@stpeters.org,www.stpeters.org,Adults|Unhoused,Food,Soup Kitchen,Provides hot food and a social space for people who are unhoused.
+Family Food Hub,15,New England Street,BN1 4GW,Wed 10am-12pm,01273555106,familyfood@hub.co.uk,www.familyfoodhub.co.uk,Families|Children|Housed,Food,Food Bank,Provides food support and cooking classes for low-income families.
+Brighton Youth Shelter,45,Preston Road,BN1 4QG,Open 24/7,01273555033,shelter@bys.org.uk,www.brightonyouthshelter.org.uk,Youth|Unhoused,Accommodation,Youth Shelter,Short-term accommodation and support for young unhoused people.
+Family First Housing,3,Hove Street,BN3 2PE,Mon-Fri 9am-5pm,01273555107,contact@familyfirst.org,www.familyfirsthousing.org,Families|Housed,Accommodation,Temporary Housing,Support for families at risk of losing their home.
+The Job Hub,8,London Road,BN1 4AD,Mon-Fri 9:30am-4:30pm,01273555044,enquiries@jobhub.org,www.thejobhub.org,Adults|Housed|Unhoused,Help into Work,Employment Advice,Free and impartial advice on finding employment, training, and education.
+Young Professionals Network,4,Western Street,BN3 1AA,Mon-Fri 9am-5pm,01273555108,info@ypnbrighton.org,www.ypnbrighton.org,Youth|Adults|Housed|LGBTQ,Help into Work,Career Development,Networking and career development workshops for young adults.
+Creative Futures,9,Trafalgar Road,BN1 4GN,Tues-Thurs 10am-4pm,01273555109,hello@creativefutures.uk,www.creativefutures.uk,Adults|Unhoused,Help into Work,Creative Skills,Workshops to develop creative skills for unhoused individuals.
+The LGBTQ Centre,30,St James's Street,BN2 1GZ,Mon-Sat 10am-8pm,01273555055,hello@lgbtqbrighton.org,www.lgbtqbrighton.org,LGBTQ|Adults|Youth,Health,Mental Health,A safe community space for LGBTQ people, offering support and social groups.
