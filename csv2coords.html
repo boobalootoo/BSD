@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CSV Address to Coordinates</title>
+</head>
+<body>
+  <h3>Addresses → Coordinates</h3>
+  <pre id="output">Loading...</pre>
+
+  <script>
+    const csvUrl = "https://raw.githubusercontent.com/boobalootoo/BSD/main/info.csv";
+
+    async function loadCSV() {
+      const res = await fetch(csvUrl);
+      const text = await res.text();
+      const rows = text.trim().split("\n").map(r => r.split(","));
+      
+      let results = [];
+      // Skip header row (row[0])
+      for (let i = 1; i < rows.length; i++) {
+        let row = rows[i];
+        let addressNum = row[1]; // Column B
+        let street = row[2];     // Column C
+        let postcode = row[3];   // Column D
+        if (!addressNum || !street || !postcode) continue;
+        let address = `${addressNum} ${street}, ${postcode}, UK`;
+        results.push(address);
+      }
+      return results;
+    }
+
+    async function getCoordinates(address) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+      const res = await fetch(url, { headers: { "User-Agent": "address-to-coords-demo" }});
+      const data = await res.json();
+      if (data.length > 0) {
+        return { address, lat: data[0].lat, lon: data[0].lon };
+      } else {
+        return { address, lat: "Not found", lon: "Not found" };
+      }
+    }
+
+    async function main() {
+      const output = document.getElementById("output");
+      const addresses = await loadCSV();
+      let lines = [];
+      for (let addr of addresses) {
+        let coords = await getCoordinates(addr);
+        lines.push(`${coords.address} → ${coords.lat}, ${coords.lon}`);
+      }
+      output.textContent = lines.join("\n");
+    }
+
+    main();
+  </script>
+</body>
+</html>
