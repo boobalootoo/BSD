@@ -138,7 +138,11 @@
 
                 filtered.forEach(s => {
                     const iconSpec = subcategoryMarkerIcons[s.subCategory] || categoryMarkerIcons[s.category];
-                    if (!iconSpec || !s.lat || !s.lng) return;
+                    // Check if lat and lng are valid numbers
+                    if (!iconSpec || isNaN(s.lat) || isNaN(s.lng)) {
+                        console.log(`Service '${s.title}' is missing location coordinates.`);
+                        return;
+                    }
                     const divIcon = makeDivIcon(iconSpec);
                     const marker = L.marker([s.lat, s.lng], { icon: divIcon })
                         .bindPopup(`
@@ -148,6 +152,9 @@
                             <div class="mt-2 text-sm">
                                 <i class="fa-solid fa-phone mr-1"></i>
                                 <a href="tel:${s.contact.replace(/\s/g,"")}" class="text-blue-600 hover:underline">${s.contact}</a>
+                            </div>
+                            <div class="mt-2 text-sm text-gray-500">
+                                <i class="fa-solid fa-location-dot mr-1"></i>${s.postcode}
                             </div>
                         `).addTo(map);
                     markers.push(marker);
@@ -198,7 +205,12 @@
                         subCategory: obj.subcategory,
                         title: obj.orgname,
                         description: obj.description,
+                        address: `${obj['address number']} ${obj['street name']}`,
+                        postcode: obj.postcode,
+                        openingTimes: obj['opening times'],
                         contact: obj['phone number'],
+                        email: obj.email,
+                        website: obj.website,
                         filters: obj['who they help'] ? obj['who they help'].split(',').map(f => f.trim()) : [],
                         lat: parseFloat(obj.latitude),
                         lng: parseFloat(obj.longitude),
@@ -306,13 +318,17 @@
                             <div class="w-12 h-12 flex items-center justify-center rounded-full ${listIconSpec.bg}">
                                 <i class="${listIconSpec.icon} ${listIconSpec.color} text-xl"></i>
                             </div>
-                            <div>
+                            <div class="flex-1">
                                 <h3 class="font-bold text-lg text-gray-800">${s.title}</h3>
-                                <p class="text-sm text-gray-500 mb-1">${s.category}${s.subCategory ? " · " + s.subCategory : ""}</p>
-                                <p class="text-gray-700 mb-2">${s.description}</p>
-                                <a href="tel:${s.contact.replace(/\s/g,"")}" class="text-sm text-blue-600 hover:underline">
-                                    <i class="fa-solid fa-phone mr-1"></i>${s.contact}
-                                </a>
+                                <p class="text-sm text-gray-500 mb-2">${s.category}${s.subCategory ? " · " + s.subCategory : ""}</p>
+                                <p class="text-gray-700 mb-3">${s.description}</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-sm text-gray-700">
+                                    ${s.address ? `<div class="flex items-center"><i class="fa-solid fa-location-dot w-5 text-center mr-2 text-gray-500"></i><span>${s.address}${s.postcode ? ', ' + s.postcode : ''}</span></div>` : ''}
+                                    ${s.openingTimes ? `<div class="flex items-center"><i class="fa-solid fa-clock w-5 text-center mr-2 text-gray-500"></i><span>${s.openingTimes}</span></div>` : ''}
+                                    ${s.contact ? `<div class="flex items-center"><i class="fa-solid fa-phone w-5 text-center mr-2 text-gray-500"></i><a href="tel:${s.contact.replace(/\s/g,"")}" class="hover:underline">${s.contact}</a></div>` : ''}
+                                    ${s.email ? `<div class="flex items-center"><i class="fa-solid fa-envelope w-5 text-center mr-2 text-gray-500"></i><a href="mailto:${s.email}" class="hover:underline">${s.email}</a></div>` : ''}
+                                    ${s.website ? `<div class="flex items-center"><i class="fa-solid fa-link w-5 text-center mr-2 text-gray-500"></i><a href="${s.website}" target="_blank" class="hover:underline">${s.website}</a></div>` : ''}
+                                </div>
                             </div>
                         `;
                         servicesList.appendChild(card);
