@@ -1,0 +1,11 @@
+Category,Number,Street,Postcode,Contact,Subcategory,Filters
+Health,12,Queens Road,BN1 3XF,01273 123456,Pregnancy & Birth,"Pregnant;Families"
+Health,25,London Road,BN1 4JB,01273 222333,Mental Health,"New Parents;Families"
+Parent Support,8,Western Road,BN3 1AE,01273 987654,Parent Groups,"New Parents;Families"
+Parent Support,42,St James Street,BN2 1RG,01273 555111,Advice Services,"Pregnant;Families"
+Child Activities,15,Dyke Road,BN1 5AA,01273 321999,Playgroups,"Children 0-2;Children 3-5"
+Child Activities,77,Elm Grove,BN2 3DD,01273 678123,Outdoor Play,"Children 3-5;Families"
+Education,3,Grand Parade,BN2 9QB,01273 444777,Nursery Schools,"Children 3-5;Families"
+Education,10,Old Shoreham Road,BN3 7BA,01273 666999,Storytime Sessions,"Children 0-2;Children 3-5"
+Practical Support,22,Preston Road,BN1 6SA,01273 246810,Food Bank,"Families;Special Needs"
+Practical Support,5,North Street,BN1 1RH,01273 135791,Clothing Bank,"Families;New Parents"
