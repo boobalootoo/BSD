@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Early Years Services Directory</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+    .subcategory-container { display: none; }
+    .subcategory-container.active { display: grid; }
+    #map { height: 400px; margin-top: 20px; border-radius: 12px; position: relative; }
+    .cat-active { outline: 3px solid rgba(59,130,246,.6); }
+    #map-legend { z-index: 1000; }
+    .leaflet-marker-icon {
+        background-color: #fff;
+        border-radius: 50%;
+        padding: 4px;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white sticky top-0 z-50 shadow-sm p-4 flex items-center justify-between">
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+      <i data-lucide="baby" class="w-7 h-7 text-blue-600"></i>
+      Early Years Services Directory
+    </h1>
+    <a href="tel:999" class="bg-red-600 text-white rounded-full p-3 md:p-4 text-xl font-bold uppercase shadow-lg hover:bg-red-700 transition-colors duration-200" aria-label="Emergency Services 999">
+      999
+    </a>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 p-4 pb-24 md:p-6">
+    <div class="max-w-4xl mx-auto">
+      
+      <!-- Filters -->
+      <section class="mb-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2">Filters</h2>
+        <div id="filter-container" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+      </section>
+
+      <!-- Categories -->
+      <section class="mb-6">
+        <h2 class="text-lg font-semibold text-gray-700 mb-2">Categories</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6" id="categories-container">
+          <button class="category-btn bg-white rounded-xl shadow-md p-4 text-center hover:scale-105 transition" data-category="Health">
+            <i data-lucide="stethoscope" class="w-10 h-10 text-green-600 mb-2"></i>
+            <span class="block font-medium">Health</span>
+          </button>
+          <button class="category-btn bg-white rounded-xl shadow-md p-4 text-center hover:scale-105 transition" data-category="Parent Support">
+            <i data-lucide="users" class="w-10 h-10 text-pink-600 mb-2"></i>
+            <span class="block font-medium">Parent Support</span>
+          </button>
+          <button class="category-btn bg-white rounded-xl shadow-md p-4 text-center hover:scale-105 transition" data-category="Child Activities">
+            <i data-lucide="baby" class="w-10 h-10 text-yellow-600 mb-2"></i>
+            <span class="block font-medium">Child Activities</span>
+          </button>
+          <button class="category-btn bg-white rounded-xl shadow-md p-4 text-center hover:scale-105 transition" data-category="Education">
+            <i data-lucide="book-open" class="w-10 h-10 text-blue-600 mb-2"></i>
+            <span class="block font-medium">Education</span>
+          </button>
+          <button class="category-btn bg-white rounded-xl shadow-md p-4 text-center hover:scale-105 transition" data-category="Practical Support">
+            <i data-lucide="utensils" class="w-10 h-10 text-red-600 mb-2"></i>
+            <span class="block font-medium">Practical Support</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Services -->
+      <section>
+        <h2 class="text-lg font-semibold text-gray-700 mb-2">Services</h2>
+        <div id="services-list" class="space-y-4"></div>
+        <div id="no-services" class="hidden text-center text-gray-500 mt-8">
+          <i data-lucide="frown" class="w-8 h-8 mb-2"></i>
+          <p class="text-lg font-medium">No services match your criteria.</p>
+        </div>
+      </section>
+
+      <!-- Map -->
+      <section>
+        <h2 class="text-lg font-semibold text-gray-700 mt-6 mb-2">Map</h2>
+        <div id="map">
+          <!-- Legend -->
+          <div id="map-legend" class="absolute bottom-4 left-4 bg-white rounded-lg shadow-md text-sm w-52">
+            <div id="legend-header" class="w-full flex items-center justify-between p-2 font-semibold bg-gray-100 rounded-t-lg cursor-move">
+              <span>Legend</span>
+              <i id="legend-arrow" data-lucide="chevron-up" class="w-4 h-4"></i>
+            </div>
+            <div id="legend-content" class="p-3 space-y-1">
+              <div class="flex items-center gap-2"><i data-lucide="stethoscope" class="w-5 h-5 text-green-600"></i> Health</div>
+              <div class="flex items-center gap-2"><i data-lucide="users" class="w-5 h-5 text-pink-600"></i> Parent Support</div>
+              <div class="flex items-center gap-2"><i data-lucide="baby" class="w-5 h-5 text-yellow-600"></i> Child Activities</div>
+              <div class="flex items-center gap-2"><i data-lucide="book-open" class="w-5 h-5 text-blue-600"></i> Education</div>
+              <div class="flex items-center gap-2"><i data-lucide="utensils" class="w-5 h-5 text-red-600"></i> Practical Support</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const csvUrl = "https://raw.githubusercontent.com/boobalootoo/BSD/main/EY/EYinfo.csv";
+
+      const filterContainer = document.getElementById("filter-container");
+      const servicesList = document.getElementById("services-list");
+      const noServicesMessage = document.getElementById("no-services");
+      const categoryButtons = document.querySelectorAll(".category-btn");
+
+      let services = [];
+      let activeFilters = new Set();
+      let activeCategory = null;
+
+      // Map
+      const map = L.map("map").setView([50.828, -0.14], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(map);
+      let markers = [];
+      
+      const iconSize = [32, 32];
+      const iconAnchor = [16, 32];
+      const popupAnchor = [0, -32];
+
+      const healthIcon = L.divIcon({ className: 'leaflet-marker-icon', html: `<i data-lucide="stethoscope" class="w-6 h-6 text-green-600"></i>`, iconSize, iconAnchor, popupAnchor });
+      const parentIcon = L.divIcon({ className: 'leaflet-marker-icon', html: `<i data-lucide="users" class="w-6 h-6 text-pink-600"></i>`, iconSize, iconAnchor, popupAnchor });
+      const childIcon = L.divIcon({ className: 'leaflet-marker-icon', html: `<i data-lucide="baby" class="w-6 h-6 text-yellow-600"></i>`, iconSize, iconAnchor, popupAnchor });
+      const educationIcon = L.divIcon({ className: 'leaflet-marker-icon', html: `<i data-lucide="book-open" class="w-6 h-6 text-blue-600"></i>`, iconSize, iconAnchor, popupAnchor });
+      const practicalIcon = L.divIcon({ className: 'leaflet-marker-icon', html: `<i data-lucide="utensils" class="w-6 h-6 text-red-600"></i>`, iconSize, iconAnchor, popupAnchor });
+      const defaultIcon = L.divIcon({ className: 'leaflet-marker-icon', html: `<i data-lucide="circle-help" class="w-6 h-6 text-gray-500"></i>`, iconSize, iconAnchor, popupAnchor });
+
+      function getCategoryMapIcon(category) {
+          switch (category) {
+              case 'Health': return healthIcon;
+              case 'Parent Support': return parentIcon;
+              case 'Child Activities': return childIcon;
+              case 'Education': return educationIcon;
+              case 'Practical Support': return practicalIcon;
+              default: return defaultIcon;
+          }
+      }
+
+      async function fetchCsv(url) {
+        const resp = await fetch(url);
+        return await resp.text();
+      }
+
+      function parseCsv(raw) {
+        const lines = raw.split(/\r?\n/).filter(l => l.trim());
+        const headers = lines[0].split(",").map(h => h.trim());
+        const rows = lines.slice(1).map(line => line.split(",").map(cell => cell.trim()));
+        return { headers, rows };
+      }
+
+      async function geocode(address) {
+        try {
+          const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" + encodeURIComponent(address);
+          const resp = await fetch(url);
+          const data = await resp.json();
+          return data[0] ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) } : null;
+        } catch (error) {
+          console.error("Geocoding failed for address:", address, error);
+          return null;
+        }
+      }
+
+      function updateMap(filtered) {
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        const validServices = filtered.filter(s => s.lat !== null && s.lng !== null);
+        validServices.forEach(s => {
+          const marker = L.marker([s.lat, s.lng], { icon: getCategoryMapIcon(s.category) })
+            .bindPopup(`<strong>${s.title}</strong><br>${s.description}`)
+            .addTo(map);
+          markers.push(marker);
+        });
+        if (markers.length > 0) {
+          const group = L.featureGroup(markers);
+          map.fitBounds(group.getBounds().pad(0.3));
+        }
+        lucide.createIcons();
+      }
+
+      function getCategoryIcon(category) {
+        switch (category) {
+          case 'Health':
+            return 'stethoscope';
+          case 'Parent Support':
+            return 'users';
+          case 'Child Activities':
+            return 'baby';
+          case 'Education':
+            return 'book-open';
+          case 'Practical Support':
+            return 'utensils';
+          default:
+            return 'circle-help';
+        }
+      }
+
+      function getCategoryColor(category) {
+        switch (category) {
+          case 'Health':
+            return 'text-green-600';
+          case 'Parent Support':
+            return 'text-pink-600';
+          case 'Child Activities':
+            return 'text-yellow-600';
+          case 'Education':
+            return 'text-blue-600';
+          case 'Practical Support':
+            return 'text-red-600';
+          default:
+            return 'text-gray-500';
+        }
+      }
+
+      function renderServices() {
+        servicesList.innerHTML = ""; // Clear existing content
+
+        const filtered = services.filter(s => {
+          if (activeCategory && s.category !== activeCategory) return false;
+          if (activeFilters.size > 0) {
+            // Check if any of the service's filters are in the set of active filters
+            return s.filters.some(f => activeFilters.has(f));
+          }
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          noServicesMessage.classList.remove("hidden");
+        } else {
+          noServicesMessage.classList.add("hidden");
+          filtered.forEach(s => {
+            const contactInfo = `
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4 text-sm text-gray-600">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="map-pin" class="w-4 h-4 text-gray-500"></i>
+                  <span>${s.address}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="clock" class="w-4 h-4 text-gray-500"></i>
+                  <span>${s.hours}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="phone" class="w-4 h-4 text-gray-500"></i>
+                  <span>${s.phone}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="mail" class="w-4 h-4 text-gray-500"></i>
+                  <span>${s.email}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i data-lucide="link" class="w-4 h-4 text-gray-500"></i>
+                  <a href="${s.website}" class="hover:underline">${s.website}</a>
+                </div>
+              </div>
+            `;
+
+            const card = document.createElement("div");
+            card.className = "bg-white rounded-xl shadow p-4 md:p-6 flex gap-4";
+            card.innerHTML = `
+              <!-- Left side with icon -->
+              <div class="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                <i data-lucide="${getCategoryIcon(s.category)}" class="w-6 h-6 ${getCategoryColor(s.category)}"></i>
+              </div>
+              <!-- Right side with content -->
+              <div class="flex-grow">
+                <div class="flex items-center gap-2 mb-1">
+                  <h3 class="font-bold text-lg">${s.title}</h3>
+                </div>
+                <p class="text-xs text-gray-500 mb-2">
+                  ${s.category} &bull; ${s.filters.join(' &bull; ')}
+                </p>
+                <p class="text-sm text-gray-700 mb-2">${s.description}</p>
+                ${s.address ? contactInfo : ''}
+              </div>
+            `;
+            servicesList.appendChild(card);
+          });
+        }
+        updateMap(filtered);
+      }
+
+      function renderFilters(uniqueFilters) {
+        filterContainer.innerHTML = "";
+        uniqueFilters.forEach(f => {
+          const label = document.createElement("label");
+          label.className = "flex items-center gap-2 bg-white p-2 rounded shadow cursor-pointer";
+          const input = document.createElement("input");
+          input.type = "checkbox"; input.value = f;
+          input.addEventListener("change", () => {
+            if (input.checked) activeFilters.add(f); else activeFilters.delete(f);
+            renderServices();
+          });
+          label.appendChild(input); 
+          label.appendChild(document.createTextNode(f));
+          filterContainer.appendChild(label);
+        });
+      }
+
+      async function loadServices() {
+        const raw = await fetchCsv(csvUrl);
+        const { headers, rows } = parseCsv(raw);
+
+        const allFilters = new Set();
+        // Map CSV rows to service objects
+        services = rows.map((row, index) => {
+          let service = {
+            id: index + 1,
+            category: row[0] || "Uncategorised",
+            title: row[1] || "Service " + (index + 1),
+            description: row[5] || "No description provided.",
+            address: row[4] || "Address not available", 
+            filters: row[6] ? row[6].split(";").map(f => f.trim().replace(/"/g, '')) : [],
+            lat: null,
+            lng: null,
+            phone: row[3] || 'N/A',
+            email: row[2] || 'N/A',
+            website: row[7] || '#',
+            hours: row[8] || 'N/A'
+          };
+          // Collect all unique filters
+          service.filters.forEach(f => allFilters.add(f));
+          return service;
+        });
+
+        // Convert the set to a sorted array and render the filters
+        const uniqueFilters = [...allFilters].sort();
+        renderFilters(uniqueFilters);
+
+        renderServices();
+
+        // Second pass: geocode and update
+        const geocodedServices = [];
+        for (const s of services) {
+          let coords = await geocode(s.address);
+          await new Promise(r => setTimeout(r, 1000));
+          if (coords) {
+            geocodedServices.push({ ...s, lat: coords.lat, lng: coords.lng });
+          } else {
+            geocodedServices.push(s);
+          }
+        }
+        services = geocodedServices;
+        renderServices();
+      }
+      
+      // Category buttons
+      categoryButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (activeCategory === btn.dataset.category) {
+            activeCategory = null;
+            btn.classList.remove("cat-active");
+          } else {
+            activeCategory = btn.dataset.category;
+            categoryButtons.forEach(b => b.classList.remove("cat-active"));
+            btn.classList.add("cat-active");
+          }
+          renderServices();
+        });
+      });
+
+      loadServices();
+
+      // ✅ Legend toggle + drag
+      const legendHeader = document.getElementById("legend-header");
+      const legendContent = document.getElementById("legend-content");
+      const legendArrow = document.getElementById("legend-arrow");
+      const legendBox = document.getElementById("map-legend");
+      let legendOpen = true;
+      let isDragging = false, offsetX = 0, offsetY = 0;
+
+      legendHeader.addEventListener("click", (e) => {
+        if (e.target === legendHeader || e.target === legendArrow) {
+          legendOpen = !legendOpen;
+          if (legendOpen) {
+            legendContent.style.display = "block";
+            legendArrow.setAttribute("data-lucide", "chevron-up");
+          } else {
+            legendContent.style.display = "none";
+            legendArrow.setAttribute("data-lucide", "chevron-down");
+          }
+          lucide.createIcons();
+        }
+      });
+
+      legendHeader.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        offsetX = e.clientX - legendBox.offsetLeft;
+        offsetY = e.clientY - legendBox.offsetTop;
+        legendBox.style.transition = "none";
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+          legendBox.style.left = `${e.clientX - offsetX}px`;
+          legendBox.style.top = `${e.clientY - offsetY}px`;
+          legendBox.style.bottom = "auto";
+          legendBox.style.right = "auto";
+        }
+      });
+
+      document.addEventListener("mouseup", () => {
+        isDragging = false;
+        legendBox.style.transition = "all 0.2s ease";
+      });
+
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
